@@ -5,6 +5,7 @@ import bodyParser from 'body-parser'
 import sockjs from 'sockjs'
 import { renderToStaticNodeStream } from 'react-dom/server'
 import React from 'react'
+import axios from 'axios'
 
 import cookieParser from 'cookie-parser'
 import config from './config'
@@ -34,6 +35,13 @@ const middleware = [
 ]
 
 middleware.forEach((it) => server.use(it))
+
+server.get('/api/v1/users/:number', async (req, res) => {
+  // получаем определенное кол-во юзеров по ссылке, используя деструктуризацию
+  const { number } = req.params
+  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+  res.json(users.slice(0, +number))
+})
 
 server.use('/api/', (req, res) => {
   res.status(404)
