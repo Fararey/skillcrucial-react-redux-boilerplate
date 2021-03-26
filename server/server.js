@@ -52,6 +52,8 @@ server.get('/api/v1/users', async (req, res) => {
     await writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: 'utf8' })
   }
   await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
+    res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
+    res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
     res.json(JSON.parse(text))
   })
 })
@@ -66,6 +68,8 @@ server.post('/api/v1/users', async (req, res) => {
     return usersArr
   })
   await writeFile(`${__dirname}/users.json`, JSON.stringify(result), { encoding: 'utf8' })
+  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
   res.json({ status: 'success', id: newUserId })
 })
 
@@ -81,6 +85,8 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
     })
   })
   await writeFile(`${__dirname}/users.json`, JSON.stringify(result), { encoding: 'utf8' })
+  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
   res.json({ status: 'success', id: userId })
 })
 
@@ -91,6 +97,8 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
     return usersArr.filter((user) => user.id !== +userId)
   })
   await writeFile(`${__dirname}/users.json`, JSON.stringify(result), { encoding: 'utf8' })
+  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
   res.json({ status: 'success', id: userId })
 })
 
