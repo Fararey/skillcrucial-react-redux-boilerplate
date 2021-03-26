@@ -109,7 +109,8 @@ server.delete('/api/v1/users', async (req, res) => {
 })
 
 server.post('/api/v1/input', (req, res) => {
-  const str = req.body.input.toUpperCase()
+  const testAdd = ' Сработало'
+  const str = req.body.input.toUpperCase() + testAdd
   res.json({ result: str })
 })
 
