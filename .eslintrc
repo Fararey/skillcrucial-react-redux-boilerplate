@@ -34,6 +34,7 @@
     "ENABLE_SOCKETS": true
   },
   "rules": {
+    "no-unused-vars": "off",
     "prettier/prettier": ["warn"],
     "space-before-function-paren": "off",
     "react/prefer-stateless-function": "warn",

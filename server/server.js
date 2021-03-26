@@ -6,11 +6,13 @@ import sockjs from 'sockjs'
 import { renderToStaticNodeStream } from 'react-dom/server'
 import React from 'react'
 import axios from 'axios'
+import { useParams } from 'react-router-dom'
 
 import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
 
+const { readFile, writeFile, stat, unlink } = require('fs').promises
 require('colors')
 
 let Root
@@ -36,12 +38,77 @@ const middleware = [
 
 middleware.forEach((it) => server.use(it))
 
-server.get('/api/v1/users/:number', async (req, res) => {
-  // получаем определенное кол-во юзеров по ссылке, используя деструктуризацию
-  const { number } = req.params
-  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
-  res.json(users.slice(0, +number))
+server.get('/api/v1/users', async (req, res) => {
+  let isFileExist
+  await stat(`${__dirname}/users.json`)
+    .then(() => {
+      isFileExist = true
+    })
+    .catch(() => {
+      isFileExist = false
+    })
+  if (!isFileExist) {
+    const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+    await writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: 'utf8' })
+  }
+  await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
+    res.json(JSON.parse(text))
+  })
 })
+
+server.post('/api/v1/users', async (req, res) => {
+  let newUserId
+  const result = await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
+    const usersArr = JSON.parse(text)
+    newUserId = usersArr.length + 1
+    const newUser = { id: newUserId }
+    usersArr.push({ ...newUser, ...req.body })
+    return usersArr
+  })
+  await writeFile(`${__dirname}/users.json`, JSON.stringify(result), { encoding: 'utf8' })
+  res.json({ status: 'success', id: newUserId })
+})
+
+server.patch('/api/v1/users/:userId', async (req, res) => {
+  const { userId } = req.params
+  const result = await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
+    const usersArr = JSON.parse(text)
+    return usersArr.map((user) => {
+      if (user.id === +userId) {
+        return { ...user, ...req.body }
+      }
+      return user
+    })
+  })
+  await writeFile(`${__dirname}/users.json`, JSON.stringify(result), { encoding: 'utf8' })
+  res.json({ status: 'success', id: userId })
+})
+
+server.delete('/api/v1/users/:userId', async (req, res) => {
+  const { userId } = req.params // originaly req.params gives you string
+  const result = await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
+    const usersArr = JSON.parse(text)
+    return usersArr.filter((user) => user.id !== +userId)
+  })
+  await writeFile(`${__dirname}/users.json`, JSON.stringify(result), { encoding: 'utf8' })
+  res.json({ status: 'success', id: userId })
+})
+
+server.delete('/api/v1/users', async (req, res) => {
+  unlink(`${__dirname}/users.json`)
+})
+
+server.post('/api/v1/input', (req, res) => {
+  const str = req.body.input.toUpperCase()
+  res.json({ result: str })
+})
+
+// server.get('/api/v1/users/:number', async (req, res) => {
+//   // получаем определенное кол-во юзеров по ссылке, используя деструктуризацию
+//   const { number } = req.params
+//   const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+//   res.json(users.slice(0, +number))
+// })
 
 server.use('/api/', (req, res) => {
   res.status(404)
