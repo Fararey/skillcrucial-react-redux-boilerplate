@@ -102,11 +102,10 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
   res.json({ status: 'success', id: userId })
 })
 
-server.delete('/api/v1/users', async (req, res) => {
-  await unlink(`${__dirname}/users.json`)
+server.delete('/api/v1/users', (req, res) => {
+  unlink(`${__dirname}/users.json`)
   res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
   res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
-  res.json({ status: 'success' })
 })
 
 server.post('/api/v1/input', (req, res) => {
