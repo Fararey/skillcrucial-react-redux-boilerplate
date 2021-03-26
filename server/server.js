@@ -51,9 +51,9 @@ server.get('/api/v1/users', async (req, res) => {
     const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
     await writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: 'utf8' })
   }
+  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
   await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
-    res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
-    res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
     res.json(JSON.parse(text))
   })
 })
