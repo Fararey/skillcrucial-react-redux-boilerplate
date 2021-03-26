@@ -104,6 +104,8 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
 
 server.delete('/api/v1/users', async (req, res) => {
   unlink(`${__dirname}/users.json`)
+  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
 })
 
 server.post('/api/v1/input', (req, res) => {
