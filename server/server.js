@@ -62,7 +62,7 @@ server.post('/api/v1/users', async (req, res) => {
   let newUserId
   const result = await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
     const usersArr = JSON.parse(text)
-    newUserId = usersArr.length + 1
+    newUserId = usersArr[usersArr.length - 1].id + 1
     const newUser = { id: newUserId }
     usersArr.push({ ...newUser, ...req.body })
     return usersArr
