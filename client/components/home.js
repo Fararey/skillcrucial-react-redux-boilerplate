@@ -11,7 +11,7 @@ const Home = () => {
       <div className="flex items-center justify-center h-screen">
         <div
           id="title"
-          className="bg-indigo-800 hover:text-red-500 text-white font-bold rounded-lg border shadow-lg p-10"
+          className="bg-red-800 text-white font-bold rounded-lg border shadow-lg p-10"
         >
           Dashboard
         </div>
