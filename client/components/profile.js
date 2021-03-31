@@ -16,7 +16,12 @@ const Profile = () => {
         >
           Profile
         </div>
-        <div id="username">{profileId}</div>
+        <div
+          id="username"
+          className="bg-indigo-800 hover:text-red-500 text-white font-bold rounded-lg border shadow-lg p-10"
+        >
+          {profileId}
+        </div>
         <div className="bg-indigo-800 hover:text-red-500 text-white font-bold rounded-lg border shadow-lg p-10">
           <Link to="/dashboard">Go to Root</Link>
         </div>
