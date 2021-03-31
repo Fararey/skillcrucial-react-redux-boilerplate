@@ -6,7 +6,6 @@ import sockjs from 'sockjs'
 import { renderToStaticNodeStream } from 'react-dom/server'
 import React from 'react'
 import axios from 'axios'
-import { useParams } from 'react-router-dom'
 
 import cookieParser from 'cookie-parser'
 import config from './config'

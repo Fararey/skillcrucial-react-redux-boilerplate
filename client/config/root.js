@@ -8,9 +8,12 @@ import { Switch, Route, Redirect, StaticRouter } from 'react-router-dom'
 import store, { history } from '../redux'
 
 import Home from '../components/home'
+import Main from '../components/dashMain'
+import Profile from '../components/profile'
 import Planets from '../components/planets'
 import DummyView from '../components/dummy-view'
 import NotFound from '../components/404'
+import Header from '../components/header'
 
 import Startup from './startup'
 
@@ -74,8 +77,11 @@ const RootComponent = (props) => {
         <Startup>
           <Switch>
             <Route exact path="/" component={() => <DummyView />} />
+            <Route exact path="/header" component={() => <Header />} />
             <Route exact path="/planets/:planetId" component={() => <Planets />} />
             <Route exact path="/dashboard" component={() => <Home />} />
+            <Route exact path="/dashboard/main" component={() => <Main />} />
+            <Route exact path="/dashboard/profile/:profileId" component={() => <Profile />} />
             <PrivateRoute exact path="/hidden-route" component={() => <DummyView />} />
             <Route component={() => <NotFound />} />
           </Switch>
