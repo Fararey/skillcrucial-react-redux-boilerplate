@@ -11,7 +11,7 @@ import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
 
-const { readFile, writeFile, stat, unlink } = require('fs').promises
+const { readFile, writeFile, unlink } = require('fs').promises
 require('colors')
 
 let Root
@@ -27,85 +27,74 @@ let connections = []
 const port = process.env.PORT || 8090
 const server = express()
 
+const setHeaders = (req, res, next) => {
+  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
+  next()
+}
+
+const toReadFile = () => readFile(`${__dirname}/users.json`, { encoding: 'utf8' })
+
+const toWriteFile = (file) =>
+  writeFile(`${__dirname}/users.json`, JSON.stringify(file), { encoding: 'utf8' })
+
+const toDelete = () => unlink(`${__dirname}/users.json`)
+
 const middleware = [
   cors(),
   express.static(path.resolve(__dirname, '../dist/assets')),
   bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }),
   bodyParser.json({ limit: '50mb', extended: true }),
-  cookieParser()
+  cookieParser(),
+  setHeaders
 ]
 
 middleware.forEach((it) => server.use(it))
 
-server.get('/api/v1/users', async (req, res) => {
-  let isFileExist
-  await stat(`${__dirname}/users.json`)
-    .then(() => {
-      isFileExist = true
+server.get('/api/v1/users/', async (req, res) => {
+  await toReadFile()
+    .then((text) => {
+      res.json(JSON.parse(text))
     })
-    .catch(() => {
-      isFileExist = false
+    .catch(async () => {
+      const { data } = await axios('https://jsonplaceholder.typicode.com/users')
+      await toWriteFile(data)
+      await toReadFile().then((text) => {
+        res.json(JSON.parse(text))
+      })
     })
-  if (!isFileExist) {
-    const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
-    await writeFile(`${__dirname}/users.json`, JSON.stringify(users), { encoding: 'utf8' })
-  }
-  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
-  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
-  await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
-    res.json(JSON.parse(text))
-  })
 })
 
-server.post('/api/v1/users', async (req, res) => {
-  let newUserId
-  const result = await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
-    const usersArr = JSON.parse(text)
-    newUserId = usersArr[usersArr.length - 1].id + 1
-    const newUser = { id: newUserId }
-    usersArr.push({ ...newUser, ...req.body })
-    return usersArr
-  })
-  await writeFile(`${__dirname}/users.json`, JSON.stringify(result), { encoding: 'utf8' })
-  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
-  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
-  res.json({ status: 'success', id: newUserId })
+server.post('/api/v1/users/', async (req, res) => {
+  const usersArr = await toReadFile().then((text) => JSON.parse(text))
+  usersArr.push({ id: usersArr[usersArr.length - 1].id + 1, ...req.body })
+  await toWriteFile(usersArr)
+  res.json({ status: `user ${usersArr[usersArr.length - 1].id} was created with your data` })
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
-  const result = await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
-    const usersArr = JSON.parse(text)
-    return usersArr.map((user) => {
-      if (user.id === +userId) {
-        return { ...user, ...req.body }
-      }
-      return user
-    })
-  })
-  await writeFile(`${__dirname}/users.json`, JSON.stringify(result), { encoding: 'utf8' })
-  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
-  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
-  res.json({ status: 'success', id: userId })
+  const usersArr = await toReadFile().then((text) => JSON.parse(text))
+  if (usersArr[+userId - 1]) {
+    usersArr[+userId - 1] = { ...usersArr[+userId - 1], ...req.body }
+    await toWriteFile(usersArr)
+    res.json({ status: `user ${userId} was updated` })
+  } else {
+    res.json({ status: `user ${userId} not exist` })
+  }
 })
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
-  const { userId } = req.params // originaly req.params gives you string
-  const result = await readFile(`${__dirname}/users.json`, { encoding: 'utf8' }).then((text) => {
-    const usersArr = JSON.parse(text)
-    return usersArr.filter((user) => user.id !== +userId)
-  })
-  await writeFile(`${__dirname}/users.json`, JSON.stringify(result), { encoding: 'utf8' })
-  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
-  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
-  res.json({ status: 'success', id: userId })
+  const { userId } = req.params
+  let usersArr = await toReadFile().then((text) => JSON.parse(text))
+  usersArr = [...usersArr.filter((user) => user.id !== +userId)]
+  await toWriteFile(usersArr)
+  res.json({ status: `user ${userId} was deleted` })
 })
 
-server.delete('/api/v1/users', (req, res) => {
-  unlink(`${__dirname}/users.json`)
-  res.set('x-skillcrucial-user', '4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df')
-  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
-  res.json({ status: 'delete' })
+server.delete('/api/v1/users/', (req, res) => {
+  toDelete()
+  res.json({ status: 'deleted' })
 })
 
 server.post('/api/v1/input', (req, res) => {
@@ -114,12 +103,12 @@ server.post('/api/v1/input', (req, res) => {
   res.json({ result: str })
 })
 
-// server.get('/api/v1/users/:number', async (req, res) => {
-//   // получаем определенное кол-во юзеров по ссылке, используя деструктуризацию
-//   const { number } = req.params
-//   const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
-//   res.json(users.slice(0, +number))
-// })
+server.get('/api/v1/users/:number', async (req, res) => {
+  // получаем определенное кол-во юзеров по ссылке, используя деструктуризацию
+  const { number } = req.params
+  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+  res.json(users.slice(0, +number))
+})
 
 server.use('/api/', (req, res) => {
   res.status(404)

@@ -7,6 +7,7 @@ import { Switch, Route, Redirect, StaticRouter } from 'react-router-dom'
 
 import store, { history } from '../redux'
 
+import Effect from '../components/effect'
 import Home from '../components/home'
 import Main from '../components/dashMain'
 import Profile from '../components/profile'
@@ -76,6 +77,7 @@ const RootComponent = (props) => {
       <RouterSelector history={history} location={props.location} context={props.context}>
         <Startup>
           <Switch>
+            <Route exact path="/effect" component={() => <Effect />} />
             <Route exact path="/" component={() => <DummyView />} />
             <Route exact path="/header" component={() => <Header />} />
             <Route exact path="/planets/:planetId" component={() => <Planets />} />
