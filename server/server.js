@@ -11,7 +11,7 @@ import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
 
-const { readFile, writeFile, unlink } = require('fs').promises
+const { readFile, writeFile, stat, unlink } = require('fs').promises
 require('colors')
 
 let Root
@@ -35,8 +35,7 @@ const setHeaders = (req, res, next) => {
 
 const toReadFile = () => readFile(`${__dirname}/users.json`, { encoding: 'utf8' })
 
-const toWriteFile = (file) =>
-  writeFile(`${__dirname}/users.json`, JSON.stringify(file), { encoding: 'utf8' })
+const toWriteFile = (file) => writeFile(`${__dirname}/users.json`, JSON.stringify(file), { encoding: 'utf8' })
 
 const toDelete = () => unlink(`${__dirname}/users.json`)
 
@@ -74,14 +73,10 @@ server.post('/api/v1/users/', async (req, res) => {
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
-  const usersArr = await toReadFile().then((text) => JSON.parse(text))
-  if (usersArr[+userId - 1]) {
-    usersArr[+userId - 1] = { ...usersArr[+userId - 1], ...req.body }
-    await toWriteFile(usersArr)
-    res.json({ status: `user ${userId} was updated` })
-  } else {
-    res.json({ status: `user ${userId} not exist` })
-  }
+  let usersArr = await toReadFile().then((text) => JSON.parse(text))
+  usersArr = usersArr.map((user) => (user.id === +userId ? { ...user, ...req.body } : user))
+  await toWriteFile(usersArr)
+  res.json({ status: `user ${userId} not exist` })
 })
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
@@ -103,12 +98,12 @@ server.post('/api/v1/input', (req, res) => {
   res.json({ result: str })
 })
 
-server.get('/api/v1/users/:number', async (req, res) => {
-  // получаем определенное кол-во юзеров по ссылке, используя деструктуризацию
-  const { number } = req.params
-  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
-  res.json(users.slice(0, +number))
-})
+// server.get('/api/v1/users/:number', async (req, res) => {
+//   // получаем определенное кол-во юзеров по ссылке, используя деструктуризацию
+//   const { number } = req.params
+//   const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+//   res.json(users.slice(0, +number))
+// })
 
 server.use('/api/', (req, res) => {
   res.status(404)
