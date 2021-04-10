@@ -1,13 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import Head from './head'
-import Header from './header'
 
 const Main = () => {
   return (
     <div>
       <Head title="Dashboard Main" />
-      <Header />
       <div className="flex items-center justify-center h-screen">
         <div
           id="title"

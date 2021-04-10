@@ -1,27 +1,19 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import Head from './head'
+import { Switch, Route } from 'react-router-dom'
 import Header from './header'
+import Dashboard from './dashboard'
+import Main from './dashMain'
+import Profile from './profile'
 
 const Home = () => {
   return (
     <div>
-      <Head title="Dashboard" />
       <Header />
-      <div className="flex items-center justify-center h-screen">
-        <div
-          id="title"
-          className="bg-red-800 text-white font-bold rounded-lg border shadow-lg p-10"
-        >
-          Dashboard
-        </div>
-        <div className="bg-indigo-800 hover:text-red-500 text-white font-bold rounded-lg border shadow-lg p-10">
-          <Link to="/dashboard/main">Go to Main</Link>
-        </div>
-        <div className="bg-indigo-800 hover:text-red-500 text-white font-bold rounded-lg border shadow-lg p-10">
-          <Link to="/dashboard/profile/4b9ae8bc-25a4-4b8f-9bcb-953a5b83e3df">Go to Profile</Link>
-        </div>
-      </div>
+      <Switch>
+        <Route exact path="/dashboard" component={() => <Dashboard />} />
+        <Route exact path="/dashboard/main" component={() => <Main />} />
+        <Route exact path="/dashboard/profile/:profileId" component={() => <Profile />} />
+      </Switch>
     </div>
   )
 }

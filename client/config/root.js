@@ -78,12 +78,13 @@ const RootComponent = (props) => {
         <Startup>
           <Switch>
             <Route exact path="/effect" component={() => <Effect />} />
-            <Route exact path="/" component={() => <DummyView />} />
+            <Route exact path="/" component={() => <Home />} />
             <Route exact path="/header" component={() => <Header />} />
             <Route exact path="/planets/:planetId" component={() => <Planets />} />
             <Route exact path="/dashboard" component={() => <Home />} />
-            <Route exact path="/dashboard/main" component={() => <Main />} />
-            <Route exact path="/dashboard/profile/:profileId" component={() => <Profile />} />
+            <Route exact path="/dashboard/*" component={() => <Home />} />
+            {/* <Route exact path="/dashboard/main" component={() => <Main />} />
+            <Route exact path="/dashboard/profile/:profileId" component={() => <Profile />} /> */}
             <PrivateRoute exact path="/hidden-route" component={() => <DummyView />} />
             <Route component={() => <NotFound />} />
           </Switch>
